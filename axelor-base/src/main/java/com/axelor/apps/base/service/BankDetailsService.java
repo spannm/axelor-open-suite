@@ -25,7 +25,7 @@ import com.axelor.apps.base.db.BankDetails;
 import com.axelor.apps.base.db.Company;
 import com.axelor.apps.base.db.Currency;
 import com.axelor.apps.base.db.Partner;
-import de.speedbanking.iban.InvalidIbanException;
+import com.axelor.apps.base.exceptions.InvalidIbanException;
 
 public interface BankDetailsService {
 
@@ -110,10 +110,13 @@ public interface BankDetailsService {
    * Validates the structural correctness and check digits of a given IBAN string.
    * <p>
    * Evaluates the format, country-specific length, and ISO 7064 Mod 97-10 checksum.
+   * Countries with no known IBAN structure are accepted without a structural check,
+   * as long as the country code itself is a valid, officially assigned ISO 3166-1 code.
    *
    * @param iban the alphanumeric IBAN string to validate
-   * @throws InvalidIbanException if the string is null, empty, contains invalid characters,
-   * fails length constraints, or has an invalid checksum digit score
+   * @throws InvalidIbanException if the country code is not a valid, officially assigned
+   * ISO 3166-1 code, or if the country has a known IBAN structure and the string is empty,
+   * contains invalid characters, fails length constraints, or has an invalid checksum digit
    */
   void validateIban(String iban) throws InvalidIbanException;
 }

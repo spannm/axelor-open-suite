@@ -1,0 +1,14 @@
+---
+title: "Base: replaced the IBAN validation library."
+module: axelor-base
+developer: |
+  IBAN validation now uses `de.speedbanking:iban-commons` instead of `org.iban4j:iban4j`
+  internally. `BankDetailsService#validateIban(String)` now declares the project-owned
+  `com.axelor.apps.base.exceptions.InvalidIbanException` instead of the iban4j-specific
+  `org.iban4j.IbanFormatException`, `org.iban4j.InvalidCheckDigitException` and
+  `org.iban4j.UnsupportedCountryException`. Any custom code catching the old iban4j exception
+  types must be updated to catch `InvalidIbanException` or `RuntimeException` instead.
+
+  Validation behavior is unchanged: IBANs whose country code is not covered by the library's
+  structural rules are still accepted without a structural check, as long as the country code
+  itself is a valid, officially assigned ISO 3166-1 code.

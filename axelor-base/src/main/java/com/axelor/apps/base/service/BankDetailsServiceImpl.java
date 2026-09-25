@@ -25,9 +25,11 @@ import com.axelor.apps.base.db.BankDetails;
 import com.axelor.apps.base.db.Company;
 import com.axelor.apps.base.db.Currency;
 import com.axelor.apps.base.db.Partner;
+import com.axelor.apps.base.exceptions.InvalidIbanException;
 import com.axelor.utils.helpers.StringHelper;
 import de.speedbanking.iban.Iban;
-import de.speedbanking.iban.InvalidIbanException;
+import de.speedbanking.iban.IbanRegistry;
+import de.speedbanking.util.Country;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -175,6 +177,17 @@ public class BankDetailsServiceImpl implements BankDetailsService {
 
   @Override
   public void validateIban(String iban) throws InvalidIbanException {
-    Iban.validate(iban);
+    try {
+      String countryCode = iban == null || iban.length() < 2 ? null : iban.substring(0, 2);
+      if (!Country.isAssigned(countryCode)) {
+        throw de.speedbanking.iban.InvalidIbanException.of(
+            de.speedbanking.iban.IbanValidationError.INVALID_COUNTRY, iban, countryCode);
+      }
+      if (IbanRegistry.getByCode(countryCode) != null) {
+        Iban.validate(iban);
+      }
+    } catch (de.speedbanking.iban.InvalidIbanException e) {
+      throw new InvalidIbanException(e, e.getMessage());
+    }
   }
 }
